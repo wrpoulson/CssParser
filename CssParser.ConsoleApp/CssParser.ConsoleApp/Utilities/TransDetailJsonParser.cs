@@ -29,7 +29,7 @@ namespace CssParser.ConsoleApp.Utilities
     {
       //TODO: WRP make the thing
       List<TransDetail> transDetails = JsonConvert.DeserializeObject<List<TransDetail>>(File.ReadAllText(sourceFilePath));
-      var sqlQuery = BuildSqlQuery(transDetails[1]);
+      var sqlQuery = BuildSqlQuery(transDetails);
       SaveSqlQueryScript(sqlQuery, currentFileName);
     }
 
@@ -57,7 +57,7 @@ namespace CssParser.ConsoleApp.Utilities
 
     private string SqlUse(string database) => $"USE {database}\nGO\n\n";
 
-    private string SqlBeginTransaction() => $"BEGIN TRANSACTION;\nGO\n\n";
+    private string SqlBeginTransaction() => $"BEGIN TRANSACTION;\nGO\n";
 
     private string SqlRollbackTransaction() => "\nROLLBACK TRANSACTION;";
 
@@ -67,7 +67,7 @@ namespace CssParser.ConsoleApp.Utilities
 
     private string SqlIfElse(string condition, string ifConditionalOperation, string elseConditionalOperation)
     {
-      return $"IF {condition}\nBEGIN{ifConditionalOperation.Replace("\n", "\n\t")}\nEND;\nELSE\nBEGIN{elseConditionalOperation.Replace("\n", "\n\t")}\nEND;";
+      return $"\nIF {condition}\nBEGIN{ifConditionalOperation.Replace("\n", "\n\t")}\nEND;\n\nELSE\nBEGIN{elseConditionalOperation.Replace("\n", "\n\t")}\nEND;";
     }
 
     private string SqlTableExistsCondition(string tableName)
@@ -95,12 +95,20 @@ namespace CssParser.ConsoleApp.Utilities
       return SqlPrint($"\tINFO: Updating record. --- FIELDNAME: {transDetail.FieldName} --- NAME: {transDetail.Name} --- TYPE: {transDetail.Type} ");
     }
 
-    private string BuildSqlQuery(TransDetail transDetail)
+    private string PrintTableDoesNotExistRollback(string tableName)
     {
-      var derp = UpdateTransDetRecord(transDetail);
-      var ifOneRecordMatchesUpdateElsePrintTransDetail = "\t" + SqlIfElse(SelectCountForTransDetRecord(transDetail), UpdateTransDetRecord(transDetail), PrintTransDetailUpdateError(transDetail));
-      var rollbackMessageTableDoesNotExist = SqlPrint("ERROR: Table: TRANS_DET does NOT exist. Commencing transaction rollback.") + SqlRollbackTransaction();
-      var ifTableExistsUpdateElseRollback = SqlIfElse(SqlTableExistsCondition("TRANS_DET"), ifOneRecordMatchesUpdateElsePrintTransDetail, rollbackMessageTableDoesNotExist);
+      return $"{SqlPrint($"ERROR: Table: {tableName} does NOT exist. Commencing transaction rollback.")}{SqlRollbackTransaction()}";
+    }
+
+    private string SqlIfElseUpdateTransDet(TransDetail transDetail)
+    {
+      return $"\t{SqlIfElse(SelectCountForTransDetRecord(transDetail), UpdateTransDetRecord(transDetail), PrintTransDetailUpdateError(transDetail))}";
+    }
+
+    private string BuildSqlQuery(List<TransDetail> transDetails)
+    {
+      var transDetailUpdates = transDetails.Select(t => { return SqlIfElseUpdateTransDet(t); });
+      var ifTableExistsUpdateElseRollback = SqlIfElse(SqlTableExistsCondition("TRANS_DET"), $"{string.Join("\n", transDetailUpdates)}\n\nCOMMIT TRANSACTION", PrintTableDoesNotExistRollback("TRANS_DET"));
       return $"{SqlPrint("--- SCRIPT EXECUTION COMMENCED ---")}\n\n{SqlUse("CODETABLES")}{SqlBeginTransaction()}{ifTableExistsUpdateElseRollback}\n{SqlPrint("--- SCRIPT EXECUTION COMPLETE ---")}";
     }
   }
