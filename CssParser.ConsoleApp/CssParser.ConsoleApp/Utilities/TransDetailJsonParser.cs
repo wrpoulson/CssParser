@@ -27,7 +27,6 @@ namespace CssParser.ConsoleApp.Utilities
 
     public void ParseTransDetJsonFile(string sourceFilePath, string currentFileName)
     {
-      //TODO: WRP make the thing
       List<TransDetail> transDetails = JsonConvert.DeserializeObject<List<TransDetail>>(File.ReadAllText(sourceFilePath));
       var sqlQuery = BuildSqlQuery(transDetails);
       SaveSqlQueryScript(sqlQuery, currentFileName);
@@ -46,6 +45,13 @@ namespace CssParser.ConsoleApp.Utilities
       allFiles.ToList().ForEach(file => ParseTransDetJsonFile(file.FullName, file.Name.Substring(0, file.Name.IndexOf(".css"))));
     }
 
+    private string BuildSqlQuery(List<TransDetail> transDetails)
+    {
+      var transDetailUpdates = transDetails.Select(t => { return SqlIfElseUpdateTransDet(t); });
+      var ifTableExistsUpdateElseRollback = SqlIfElse(SqlTableExistsCondition("TRANS_DET"), $"{string.Join("\n", transDetailUpdates)}\n\nCOMMIT TRANSACTION", PrintTableDoesNotExistRollback("TRANS_DET"));
+      return $"{SqlPrint("--- SCRIPT EXECUTION COMMENCED ---")}\n\n{SqlUse("CODETABLES")}{SqlBeginTransaction()}{ifTableExistsUpdateElseRollback}\n{SqlPrint("--- SCRIPT EXECUTION COMPLETE ---")}";
+    }
+    
     private void SaveSqlQueryScript(string query, string outputFileName)
     {
       if (!Directory.Exists(OUTPUT_PATH))
@@ -105,11 +111,5 @@ namespace CssParser.ConsoleApp.Utilities
       return $"\t{SqlIfElse(SelectCountForTransDetRecord(transDetail), UpdateTransDetRecord(transDetail), PrintTransDetailUpdateError(transDetail))}";
     }
 
-    private string BuildSqlQuery(List<TransDetail> transDetails)
-    {
-      var transDetailUpdates = transDetails.Select(t => { return SqlIfElseUpdateTransDet(t); });
-      var ifTableExistsUpdateElseRollback = SqlIfElse(SqlTableExistsCondition("TRANS_DET"), $"{string.Join("\n", transDetailUpdates)}\n\nCOMMIT TRANSACTION", PrintTableDoesNotExistRollback("TRANS_DET"));
-      return $"{SqlPrint("--- SCRIPT EXECUTION COMMENCED ---")}\n\n{SqlUse("CODETABLES")}{SqlBeginTransaction()}{ifTableExistsUpdateElseRollback}\n{SqlPrint("--- SCRIPT EXECUTION COMPLETE ---")}";
-    }
   }
 }
