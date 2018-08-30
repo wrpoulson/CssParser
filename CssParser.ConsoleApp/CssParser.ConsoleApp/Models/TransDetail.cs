@@ -5,6 +5,7 @@ namespace CssParser.ConsoleApp.Models
   {
     public int JsonRecordId { get; set; }
     public int FileLineNumber { get; set; }
+    public string Name { get; set; }
     public string Type => "HDR";
     public string FieldName { get; set; }
     public int? Xp_Css_Left { get; set; }

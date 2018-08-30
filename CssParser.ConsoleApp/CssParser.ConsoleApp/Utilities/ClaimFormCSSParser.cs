@@ -32,6 +32,7 @@ namespace CssParser.ConsoleApp.Utilities
       int potentialRecordCount = 0;
       int potentialLinesEndedWithCommaCount = 0;
       var data = File.ReadAllLines(sourceFilePath);
+      string transDetailName = GetTransDetailName(sourceFilePath);
       List<TransDetailError> savedErrors = new List<TransDetailError>();
       List<TransDetailError> unsavedErrors = new List<TransDetailError>();
       TransDetailParseResponse transDetailParseResponse = new TransDetailParseResponse { ParsedTransDetails = new List<TransDetail>() };
@@ -76,6 +77,7 @@ namespace CssParser.ConsoleApp.Utilities
         {
           transDetail.FileLineNumber = i + 1;
           transDetail.JsonRecordId = ++jsonRecordId;
+          transDetail.Name = transDetailName;
           transDetailParseResponse.ParsedTransDetails.Add(transDetail);
         }
 
@@ -178,6 +180,13 @@ namespace CssParser.ConsoleApp.Utilities
       if (transDetail == null) return false;
       if (transDetail.Xp_Css_Left == null || transDetail.Xp_Css_Top == null || transDetail.Xp_Css_Width == null) return false;
       return true;
+    }
+
+    private string GetTransDetailName(string sourceFilePath)
+    {
+      if (sourceFilePath?.Contains("ClaimFormUB") ?? false) return "UB";
+      if (sourceFilePath?.Contains("ClaimFormHCFATertiary") ?? false) return "HCFA";
+      return null;
     }
   }
 }

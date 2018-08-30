@@ -25,23 +25,83 @@ namespace CssParser.ConsoleApp.Utilities
       }
     }
 
+    public void ParseTransDetJsonFile(string sourceFilePath, string currentFileName)
+    {
+      //TODO: WRP make the thing
+      List<TransDetail> transDetails = JsonConvert.DeserializeObject<List<TransDetail>>(File.ReadAllText(sourceFilePath));
+      var sqlQuery = BuildSqlQuery(transDetails[1]);
+      SaveSqlQueryScript(sqlQuery, currentFileName);
+    }
+
     private void ParseMostRecentTransDetJsonFiles(FileInfo[] allFiles)
     {
       var fileNames = allFiles.Select(m => m.Name).ToArray();
       var uniqueFilePrecursors = Array.ConvertAll(fileNames, fileName => fileName.Substring(0, fileName.IndexOf(".css"))).Distinct();
       var mostRecentFiles = uniqueFilePrecursors.Select(m => allFiles.OrderByDescending(f => f.CreationTime).First(f => f.Name.StartsWith(m))).ToList();
-      mostRecentFiles.ForEach(file => ParseTransDetJsonFile(file.FullName, file.Name));
+      mostRecentFiles.ForEach(file => ParseTransDetJsonFile(file.FullName, file.Name.Substring(0, file.Name.IndexOf(".css"))));
     }
 
     private void ParseAllTransDetJsonFiles(FileInfo[] allFiles)
     {
-      allFiles.ToList().ForEach(file => ParseTransDetJsonFile(file.FullName, file.Name));
+      allFiles.ToList().ForEach(file => ParseTransDetJsonFile(file.FullName, file.Name.Substring(0, file.Name.IndexOf(".css"))));
     }
 
-    public void ParseTransDetJsonFile(string sourceFilePath, string currentFileName)
+    private void SaveSqlQueryScript(string query, string outputFileName)
     {
-      //TODO: WRP make the thing
-      List<TransDetail> transDetails = JsonConvert.DeserializeObject<List<TransDetail>>(File.ReadAllText(sourceFilePath));
+      if (!Directory.Exists(OUTPUT_PATH))
+      {
+        Directory.CreateDirectory(OUTPUT_PATH);
+      }
+      File.WriteAllText($"{OUTPUT_PATH}{outputFileName}_{DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss")}.Updates.sql", query);
+    }
+
+    private string SqlUse(string database) => $"USE {database}\nGO\n\n";
+
+    private string SqlBeginTransaction() => $"BEGIN TRANSACTION;\nGO\n\n";
+
+    private string SqlRollbackTransaction() => "\nROLLBACK TRANSACTION;";
+
+    private string SqlPrint(string text) => $"\nPRINT CAST(GETDATE() as Datetime2(3))\nPRINT N'{text}'";
+
+    private string SqlIf(string condition, string conditionalOperation) => $"IF {condition}\nBEGIN\n{conditionalOperation.Replace("\n","\n\t")}\nEND;";
+
+    private string SqlIfElse(string condition, string ifConditionalOperation, string elseConditionalOperation)
+    {
+      return $"IF {condition}\nBEGIN{ifConditionalOperation.Replace("\n", "\n\t")}\nEND;\nELSE\nBEGIN{elseConditionalOperation.Replace("\n", "\n\t")}\nEND;";
+    }
+
+    private string SqlTableExistsCondition(string tableName)
+    {
+      return $"(EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = '{tableName}'))";
+    }
+
+    private string UpdateTransDetRecord(TransDetail transDetail)
+    {
+      return $"{PrintTransDetailUpdate(transDetail)}\n\nUPDATE TRANS_DET\nSET XP_CSS_LEFT = '{transDetail.Xp_Css_Left}', XP_CSS_TOP = '{transDetail.Xp_Css_Top}', XP_CSS_WIDTH = '{transDetail.Xp_Css_Width}'\nWHERE FIELDNAME = '{transDetail.FieldName}' AND [TYPE] = '{transDetail.Type}' AND [NAME] = '{transDetail.Name}'";
+    }
+
+    private string SelectCountForTransDetRecord(TransDetail transDetail)
+    {
+      return $"(SELECT COUNT(*) FROM TRANS_DET WHERE FIELDNAME = '{transDetail.FieldName}' AND [TYPE] = '{transDetail.Type}' AND [NAME] = '{transDetail.Name}') = 1";
+    }
+
+    private string PrintTransDetailUpdateError(TransDetail transDetail)
+    {
+      return SqlPrint($"\tWARNING: Record was NOT UPDATED. --- FIELDNAME: {transDetail.FieldName} --- NAME: {transDetail.Name} --- TYPE: {transDetail.Type} ");
+    }
+
+    private string PrintTransDetailUpdate(TransDetail transDetail)
+    {
+      return SqlPrint($"\tINFO: Updating record. --- FIELDNAME: {transDetail.FieldName} --- NAME: {transDetail.Name} --- TYPE: {transDetail.Type} ");
+    }
+
+    private string BuildSqlQuery(TransDetail transDetail)
+    {
+      var derp = UpdateTransDetRecord(transDetail);
+      var ifOneRecordMatchesUpdateElsePrintTransDetail = "\t" + SqlIfElse(SelectCountForTransDetRecord(transDetail), UpdateTransDetRecord(transDetail), PrintTransDetailUpdateError(transDetail));
+      var rollbackMessageTableDoesNotExist = SqlPrint("ERROR: Table: TRANS_DET does NOT exist. Commencing transaction rollback.") + SqlRollbackTransaction();
+      var ifTableExistsUpdateElseRollback = SqlIfElse(SqlTableExistsCondition("TRANS_DET"), ifOneRecordMatchesUpdateElsePrintTransDetail, rollbackMessageTableDoesNotExist);
+      return $"{SqlPrint("--- SCRIPT EXECUTION COMMENCED ---")}\n\n{SqlUse("CODETABLES")}{SqlBeginTransaction()}{ifTableExistsUpdateElseRollback}\n{SqlPrint("--- SCRIPT EXECUTION COMPLETE ---")}";
     }
   }
 }
