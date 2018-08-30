@@ -9,7 +9,7 @@ namespace CssParser.ConsoleApp
       var claimFormCssParser = new ClaimFormCssParser();
       var transDetailJsonParser = new TransDetailJsonParser();
       claimFormCssParser.ParseSourceCssFiles(@"Content\SourceCSS");
-      transDetailJsonParser.ParseTransDetJsonFiles(@"Content\OutputJSON");
+      transDetailJsonParser.ParseTransDetJsonFiles(@"Content\OutputJSON", true);
     }
   }
 }
