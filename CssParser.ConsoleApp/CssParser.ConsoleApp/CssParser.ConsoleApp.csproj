@@ -47,11 +47,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\FileStatRecord.cs" />
-    <Compile Include="Models\TransDetRecord.cs" />
+    <Compile Include="Models\TransDetailParseResult.cs" />
+    <Compile Include="Models\TransDetailError.cs" />
+    <Compile Include="Models\TransDetail.cs" />
+    <Compile Include="Models\TransDetailParseResponse.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities\ClaimFormCSSParser.cs" />
+    <Compile Include="Utilities\ClaimFormCssParser.cs" />
+    <Compile Include="Utilities\TransDetailJsonParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -59,7 +62,15 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\OutputJSON\" />
-    <Folder Include="Content\SourceCSS\" />
+    <Folder Include="Content\OutputSQL\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\SourceCSS\ClaimFormHCFATertiary.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\SourceCSS\ClaimFormUB.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -6,8 +6,10 @@ namespace CssParser.ConsoleApp
   {
     static void Main(string[] args)
     {
-      var ClaimFormCSSParser = new ClaimFormCSSParser();
-      ClaimFormCSSParser.ParseSourceCSSFile();
+      var claimFormCssParser = new ClaimFormCssParser();
+      var transDetailJsonParser = new TransDetailJsonParser();
+      claimFormCssParser.ParseSourceCssFiles(@"Content\SourceCSS");
+      transDetailJsonParser.ParseTransDetJsonFiles(@"Content\OutputJSON");
     }
   }
 }
