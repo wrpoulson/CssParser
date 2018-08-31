@@ -5,9 +5,9 @@ using System.IO;
 using CssParser.ConsoleApp.Models;
 using System.Linq;
 
-namespace CssParser.ConsoleApp.Utilities
+namespace CssParser.ConsoleApp.Utilities.ClaimForm
 {
-  public class ClaimFormCssParser
+  public class CssToJsonParser
   {
     const string OUTPUT_PATH = @"Content\OutputJSON\";
 

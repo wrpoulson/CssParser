@@ -1,4 +1,4 @@
-﻿using CssParser.ConsoleApp.Utilities;
+﻿using CssParser.ConsoleApp.Utilities.ClaimForm;
 
 namespace CssParser.ConsoleApp
 {
@@ -6,8 +6,8 @@ namespace CssParser.ConsoleApp
   {
     static void Main(string[] args)
     {
-      var claimFormCssParser = new ClaimFormCssParser();
-      var transDetailJsonParser = new TransDetailJsonParser();
+      var claimFormCssParser = new CssToJsonParser();
+      var transDetailJsonParser = new JsonToSqlParser();
       claimFormCssParser.ParseSourceCssFiles(@"Content\SourceCSS");
       transDetailJsonParser.ParseTransDetJsonFiles(@"Content\OutputJSON", true);
     }
