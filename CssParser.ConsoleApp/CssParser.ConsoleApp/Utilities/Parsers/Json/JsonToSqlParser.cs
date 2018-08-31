@@ -52,8 +52,8 @@ namespace CssParser.ConsoleApp.Utilities.Parsers.Json
             var transDetailUpdates = transDetails.Select(t => { return SqbTransDetail.SqlIfElseUpdateTransDet(t); });
 
             var ifTableExistsUpdateElseRollback = SqlQueryBuilder.IfElse(
-                                                      SqlQueryBuilder.TableExistsCondition("dbo", "TRANS_DET"), // condition
-                                                      $"{string.Join("\n", transDetailUpdates)}\n", // if
+                                                      SqlQueryBuilder.TableExistsCondition("dbo", "TRANS_DET"),    // condition
+                                                      $"{string.Join("\n", transDetailUpdates)}\n",                // if
                                                       SqbTransDetail.PrintTableDoesNotExistRollback("TRANS_DET")); // else
 
 
