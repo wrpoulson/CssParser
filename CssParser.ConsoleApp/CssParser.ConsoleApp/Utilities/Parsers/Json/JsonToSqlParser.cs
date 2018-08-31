@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using CssParser.ConsoleApp.Models;
+using CssParser.ConsoleApp.Models.ClaimForm;
 using Newtonsoft.Json;
 using System;
 using CssParser.ConsoleApp.Utilities.SqlQueryBuilders;

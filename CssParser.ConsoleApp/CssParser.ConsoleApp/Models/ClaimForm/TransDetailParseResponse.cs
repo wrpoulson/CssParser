@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CssParser.ConsoleApp.Models
+namespace CssParser.ConsoleApp.Models.ClaimForm
 {
   public class TransDetailParseResponse
   {

@@ -1,4 +1,4 @@
-﻿using CssParser.ConsoleApp.Models;
+﻿using CssParser.ConsoleApp.Models.ClaimForm;
 
 namespace CssParser.ConsoleApp.Utilities.SqlQueryBuilders.ClaimForm
 {

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using CssParser.ConsoleApp.Models;
+using CssParser.ConsoleApp.Models.ClaimForm;
 using System.Linq;
 
 namespace CssParser.ConsoleApp.Utilities.Parsers.Css
@@ -23,35 +23,34 @@ namespace CssParser.ConsoleApp.Utilities.Parsers.Css
       var transDetailParseResponse = ParseTransDetailsFromFile(sourceFilePath);
       var fileName = $"{currentFileName}_{DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss")}";
       SaveParsedTransDetails(transDetailParseResponse.ParsedTransDetails, fileName);
-      SaveParsedResults(transDetailParseResponse.ParseResult, fileName);
+      SaveParseResults(transDetailParseResponse.ParseResult, fileName);
     }
 
     private TransDetailParseResponse ParseTransDetailsFromFile(string sourceFilePath)
     {
       int jsonRecordId = 0;
+      int errorRecordId = 0;
       int potentialRecordCount = 0;
-      int potentialLinesEndedWithCommaCount = 0;
       var data = File.ReadAllLines(sourceFilePath);
       string transDetailName = GetTransDetailName(sourceFilePath);
-      List<TransDetailError> savedErrors = new List<TransDetailError>();
-      List<TransDetailError> unsavedErrors = new List<TransDetailError>();
+      List<TransDetailError> errors = new List<TransDetailError>();
       TransDetailParseResponse transDetailParseResponse = new TransDetailParseResponse { ParsedTransDetails = new List<TransDetail>() };
-      
+
       for (var i = 0; i < data.Length; i++)
       {
         TransDetail transDetail = null;
-        TransDetailError transDetailError = new TransDetailError();
+        TransDetailError transDetailError = null;
+        int fileLineNumber = i + 1;
 
         if (data[i]?.Trim().StartsWith("#txt") ?? false)
         {
           potentialRecordCount++;
           string fieldName = data[i].Replace("#txt", "")?.Trim();
+          transDetailError = new TransDetailError();
           transDetailError.FieldName = fieldName;
-          transDetailError.FileLineNumber = i + 1;
 
           if (data[i]?.Trim().EndsWith(",") ?? false)
           {
-            potentialLinesEndedWithCommaCount++;
             transDetailError.IsLineEndingWithComma = true;
           }
 
@@ -73,33 +72,30 @@ namespace CssParser.ConsoleApp.Utilities.Parsers.Css
           }
         }
 
-        if (transDetail != null)
+        if(transDetail != null)
         {
-          transDetail.FileLineNumber = i + 1;
-          transDetail.JsonRecordId = ++jsonRecordId;
+          transDetail.FileLineNumber = fileLineNumber;
           transDetail.Name = transDetailName;
-          transDetailParseResponse.ParsedTransDetails.Add(transDetail);
         }
 
-        if ((transDetail != null && !IsTransDetailValid(transDetail)) || transDetailError.IsErrorDueToHeight20Px || transDetailError.IsLineEndingWithComma || transDetailError.IsErrorDueToBrace)
+        if (IsTransDetailValid(transDetail))
         {
+          transDetail.JsonRecordId = ++jsonRecordId;
+          transDetailParseResponse.ParsedTransDetails.Add(transDetail);
+        }
+        else if (transDetailError != null)
+        {
+          transDetailError.FileLineNumber = fileLineNumber;
           transDetailError.IsXpCssLeftNull = transDetail?.Xp_Css_Left == null;
           transDetailError.IsXpCssTopNull = transDetail?.Xp_Css_Top == null;
           transDetailError.IsXpCssWidthNull = transDetail?.Xp_Css_Width == null;
-
-          if (transDetail != null)
-          {
-            transDetailError.IsTransDetailSaved = true;
-            savedErrors.Add(transDetailError);
-          }
-          else
-          {
-            unsavedErrors.Add(transDetailError);
-          }
+          transDetailError.ErrorRecordId = ++errorRecordId;
+          transDetailError.InvalidTransDetail = transDetail;
+          errors.Add(transDetailError);
         }
       }
 
-      transDetailParseResponse.ParseResult = BuildParseResult(potentialRecordCount, potentialLinesEndedWithCommaCount, transDetailParseResponse.ParsedTransDetails, savedErrors, unsavedErrors);
+      transDetailParseResponse.ParseResult = BuildParseResult(potentialRecordCount, transDetailParseResponse.ParsedTransDetails, errors);
 
       return transDetailParseResponse;
     }
@@ -114,7 +110,7 @@ namespace CssParser.ConsoleApp.Utilities.Parsers.Css
       File.WriteAllText($"{OUTPUT_PATH}{outputFileName}.TransDetails.json", JsonConvert.SerializeObject(parsedTransDetails, Formatting.Indented));
     }
 
-    private void SaveParsedResults(TransDetailParseResult transDetailParseResult, string outputFileName)
+    private void SaveParseResults(TransDetailParseResult transDetailParseResult, string outputFileName)
     {
       JsonSerializer serializer = new JsonSerializer();
       if (!Directory.Exists(OUTPUT_PATH))
@@ -160,18 +156,13 @@ namespace CssParser.ConsoleApp.Utilities.Parsers.Css
       return transDetail;
     }
 
-    private TransDetailParseResult BuildParseResult(int potentialRecordCount, int potentialLinesEndedWithCommaCount, List<TransDetail> parsedTransDetails, List<TransDetailError> savedErrors, List<TransDetailError> unsavedErrors)
+    private TransDetailParseResult BuildParseResult(int potentialRecordCount, List<TransDetail> parsedTransDetails, List<TransDetailError> errors)
     {
       return new TransDetailParseResult
       {
         PotentialLinesIdentified = potentialRecordCount,
-        PotentialLinesEndedWithComma = potentialLinesEndedWithCommaCount,
         SavedTransDetails = parsedTransDetails.Count,
-        XpCssLeftNull = parsedTransDetails.Where(m => m.Xp_Css_Left == null).Count(),
-        XpCssTopNull = parsedTransDetails.Where(m => m.Xp_Css_Top == null).Count(),
-        XpCssWidthNull = parsedTransDetails.Where(m => m.Xp_Css_Width == null).Count(),
-        SavedErrors = savedErrors,
-        UnsavedErrors = unsavedErrors
+        ErrorDetails = new TransDetailParseErrorInfo { Errors = errors }
       };
     }
 
