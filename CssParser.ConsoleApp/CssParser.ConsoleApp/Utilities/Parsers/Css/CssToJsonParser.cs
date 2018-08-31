@@ -11,19 +11,23 @@ namespace CssParser.ConsoleApp.Utilities.Parsers.Css
   {
     const string OUTPUT_PATH = @"Content\OutputJSON\";
 
-    public void ParseSourceCssFiles(string sourceFilesPath)
+    public void ParseSourceCssFiles(string sourceFilesPath, bool includeModifiedCss)
     {
       if (!Directory.Exists(sourceFilesPath)) throw new DirectoryNotFoundException();
       FileInfo[] files = new DirectoryInfo(sourceFilesPath).GetFiles("*.css");
-      files.ToList().ForEach(file => ParseSourceCssFile(file.FullName, file.Name));
+      files.ToList().ForEach(file => ParseSourceCssFile(file.FullName, file.Name, includeModifiedCss));
     }
 
-    public void ParseSourceCssFile(string sourceFilePath, string currentFileName)
+    public void ParseSourceCssFile(string sourceFilePath, string currentFileName, bool includeModifiedCss)
     {
       var transDetailParseResponse = ParseTransDetailsFromFile(sourceFilePath);
-      var fileName = $"{currentFileName}_{DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss")}";
-      SaveParsedTransDetails(transDetailParseResponse.ParsedTransDetails, fileName);
-      SaveParseResults(transDetailParseResponse.ParseResult, fileName);
+      SaveParsedTransDetails(transDetailParseResponse.ParsedTransDetails, currentFileName, currentFileName.Contains("Modified"));
+      SaveParseResults(transDetailParseResponse.ParseResult, currentFileName, currentFileName.Contains("Modified"));
+      if (includeModifiedCss)
+      {
+        string modifiedFileName = currentFileName.Replace(".css", ".Modified.css");
+        ParseSourceCssFile(sourceFilePath.Replace(currentFileName, $"{@"Modified\"}{modifiedFileName}"), modifiedFileName, false);
+      }
     }
 
     private TransDetailParseResponse ParseTransDetailsFromFile(string sourceFilePath)
@@ -100,24 +104,26 @@ namespace CssParser.ConsoleApp.Utilities.Parsers.Css
       return transDetailParseResponse;
     }
 
-    private void SaveParsedTransDetails(List<TransDetail> parsedTransDetails, string outputFileName)
+    private void SaveParsedTransDetails(List<TransDetail> parsedTransDetails, string outputFileName, bool isModifiedCss)
     {
+      string outputPath = isModifiedCss ? $"{OUTPUT_PATH}Modified\\" : OUTPUT_PATH;
       JsonSerializer serializer = new JsonSerializer();
-      if (!Directory.Exists(OUTPUT_PATH))
+      if (!Directory.Exists(outputPath))
       {
-        Directory.CreateDirectory(OUTPUT_PATH);
+        Directory.CreateDirectory(outputPath);
       }
-      File.WriteAllText($"{OUTPUT_PATH}{outputFileName}.TransDetails.json", JsonConvert.SerializeObject(parsedTransDetails, Formatting.Indented));
+      File.WriteAllText($"{outputPath}{outputFileName}.TransDetails.json", JsonConvert.SerializeObject(parsedTransDetails, Formatting.Indented));
     }
 
-    private void SaveParseResults(TransDetailParseResult transDetailParseResult, string outputFileName)
+    private void SaveParseResults(TransDetailParseResult transDetailParseResult, string outputFileName, bool isModifiedCss)
     {
+      string outputPath = isModifiedCss ? $"{OUTPUT_PATH}Modified\\" : OUTPUT_PATH;
       JsonSerializer serializer = new JsonSerializer();
-      if (!Directory.Exists(OUTPUT_PATH))
+      if (!Directory.Exists(outputPath))
       {
-        Directory.CreateDirectory(OUTPUT_PATH);
+        Directory.CreateDirectory(outputPath);
       }
-      File.WriteAllText($"{OUTPUT_PATH}{outputFileName}.ParseResults.json", JsonConvert.SerializeObject(transDetailParseResult, Formatting.Indented));
+      File.WriteAllText($"{outputPath}{outputFileName}.ParseResults.json", JsonConvert.SerializeObject(transDetailParseResult, Formatting.Indented));
     }
 
     private TransDetail BuildTransDetail(string fieldName, string cssProperties)
