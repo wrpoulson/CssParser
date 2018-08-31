@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CssParser.ConsoleApp.Utilities.ClaimForm
+﻿
+namespace CssParser.ConsoleApp.Utilities.SqlQueryBuilders
 {
     public static class SqlQueryBuilder
     {
-        public static string Use(string database) => $"USE {database}\nGO\n\n";
+        public static string Use(string database) => $"USE {database}\nGO\n";
 
         public static string BeginTransaction() => $"BEGIN TRANSACTION;\nGO\n";
 

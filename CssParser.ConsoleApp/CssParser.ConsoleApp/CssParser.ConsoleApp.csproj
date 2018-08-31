@@ -53,19 +53,20 @@
     <Compile Include="Models\TransDetailParseResponse.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities\ClaimForm\SqlQueryBuilder.cs" />
-    <Compile Include="Utilities\ClaimForm\CssToJsonParser.cs" />
-    <Compile Include="Utilities\ClaimForm\JsonToSqlParser.cs" />
+    <Compile Include="Utilities\SqlQueryBuilders\SqlQueryBuilder.cs" />
+    <Compile Include="Utilities\Parsers\Css\CssToJsonParser.cs" />
+    <Compile Include="Utilities\Parsers\Json\JsonToSqlParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <Compile Include="Utilities\ClaimForm\SqbTransDetail.cs" />
+    <Compile Include="Utilities\SqlQueryBuilders\ClaimForm\SqbTransDetail.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\OutputJSON\" />
     <Folder Include="Content\OutputSQL\" />
     <Folder Include="Models\ClaimForm\" />
+    <Folder Include="Utilities\Parsers\ClaimForm\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\SourceCSS\ClaimFormHCFATertiary.css">

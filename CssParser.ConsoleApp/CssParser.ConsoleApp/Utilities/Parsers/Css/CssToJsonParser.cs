@@ -5,7 +5,7 @@ using System.IO;
 using CssParser.ConsoleApp.Models;
 using System.Linq;
 
-namespace CssParser.ConsoleApp.Utilities.ClaimForm
+namespace CssParser.ConsoleApp.Utilities.Parsers.Css
 {
   public class CssToJsonParser
   {

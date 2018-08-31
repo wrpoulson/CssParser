@@ -1,11 +1,6 @@
 ﻿using CssParser.ConsoleApp.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace CssParser.ConsoleApp.Utilities.ClaimForm
+namespace CssParser.ConsoleApp.Utilities.SqlQueryBuilders.ClaimForm
 {
     public static class SqbTransDetail
     {
@@ -25,17 +20,12 @@ namespace CssParser.ConsoleApp.Utilities.ClaimForm
 
         public static string PrintTableDoesNotExistRollback(string tableName)
         {
-            return $"{SqlQueryBuilder.Print($"ERROR: Table: {tableName} does NOT exist. Commencing transaction rollback.")}{SqlQueryBuilder.RollbackTransaction()}";
+            return $"{SqlQueryBuilder.Print($"ERROR: Table: {tableName} does NOT exist. Commencing transaction rollback.")}";
         }
 
         public static string SqlIfElseUpdateTransDet(TransDetail transDetail)
         {
             return $"\t{SqlQueryBuilder.IfElse(SelectCountForTransDetRecord(transDetail), UpdateTransDetRecord(transDetail), PrintTransDetailUpdateError(transDetail))}";
-        }
-
-		public static string UseCodetablesBeginTransaction()
-        {
-            return $"{SqlQueryBuilder.Use("CODETABLES")}{SqlQueryBuilder.BeginTransaction()}";
         }
     }
 }

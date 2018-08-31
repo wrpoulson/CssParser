@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using CssParser.ConsoleApp.Models;
 using Newtonsoft.Json;
 using System;
+using CssParser.ConsoleApp.Utilities.SqlQueryBuilders;
+using CssParser.ConsoleApp.Utilities.SqlQueryBuilders.ClaimForm;
 
-namespace CssParser.ConsoleApp.Utilities.ClaimForm
+namespace CssParser.ConsoleApp.Utilities.Parsers.Json
 {
     public class JsonToSqlParser
     {
@@ -47,16 +49,15 @@ namespace CssParser.ConsoleApp.Utilities.ClaimForm
 
         private string BuildSqlQuery(List<TransDetail> transDetails)
         {
-            var transDetailUpdates = transDetails[1];// transDetails.Select(t => { return SqbTransDetail.SqlIfElseUpdateTransDet(t); });
+            var transDetailUpdates = transDetails.Select(t => { return SqbTransDetail.SqlIfElseUpdateTransDet(t); });
 
             var ifTableExistsUpdateElseRollback = SqlQueryBuilder.IfElse(
                                                       SqlQueryBuilder.TableExistsCondition("dbo", "TRANS_DET"), // condition
-                                                      $"{string.Join("\n", transDetailUpdates)}\n\nCOMMIT TRANSACTION", // if
+                                                      $"{string.Join("\n", transDetailUpdates)}\n", // if
                                                       SqbTransDetail.PrintTableDoesNotExistRollback("TRANS_DET")); // else
 
-            var catchBlock = SqlQueryBuilder.Catch($"{SqlQueryBuilder.Print("!!! EXPCEPTION THROWN !!!\n!!! TRANSACTION ROLLBACK !!!\n")}{SqlQueryBuilder.RollbackTransaction()}");
 
-            return $"{SqlQueryBuilder.Print("\t--SCRIPT START--")}\n\n{SqbTransDetail.UseCodetablesBeginTransaction()}{SqlQueryBuilder.Try(ifTableExistsUpdateElseRollback)}\n{catchBlock}\n{SqlQueryBuilder.Print("\t--SCRIPT END--")}";
+            return $"{SqlQueryBuilder.Print("\t--SCRIPT START--")}\n\n{SqlQueryBuilder.Use("CODETABLES")}{ifTableExistsUpdateElseRollback}\n{SqlQueryBuilder.Print("\t--SCRIPT END--")}";
         }
 
         private void SaveSqlQueryScript(string query, string outputFileName)
