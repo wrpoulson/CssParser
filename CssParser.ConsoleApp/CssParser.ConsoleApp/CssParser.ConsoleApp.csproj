@@ -48,6 +48,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Implementations\Interfaces\ICssToJsonParser.cs" />
+    <Compile Include="Implementations\Interfaces\IJsonToSqlParser.cs" />
+    <Compile Include="Implementations\Interfaces\IParser.cs" />
     <Compile Include="Models\ClaimForm\TransDetailParseErrorInfo.cs" />
     <Compile Include="Models\ClaimForm\TransDetailParseResult.cs" />
     <Compile Include="Models\ClaimForm\TransDetailError.cs" />
@@ -55,9 +58,10 @@
     <Compile Include="Models\ClaimForm\TransDetailParseResponse.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\Parsers\ClaimForm\TransDetailParser.cs" />
     <Compile Include="Utilities\SqlQueryBuilders\SqlQueryBuilder.cs" />
-    <Compile Include="Utilities\Parsers\Css\CssToJsonParser.cs" />
-    <Compile Include="Utilities\Parsers\Json\JsonToSqlParser.cs" />
+    <Compile Include="Utilities\Parsers\ClaimForm\CssToJsonParser.cs" />
+    <Compile Include="Utilities\Parsers\ClaimForm\JsonToSqlParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -67,7 +71,6 @@
   <ItemGroup>
     <Folder Include="Content\OutputJSON\" />
     <Folder Include="Content\OutputSQL\" />
-    <Folder Include="Utilities\Parsers\ClaimForm\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\SourceCSS\ClaimFormHCFATertiary.css">
