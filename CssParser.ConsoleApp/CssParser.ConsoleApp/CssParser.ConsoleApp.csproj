@@ -73,16 +73,10 @@
     <Folder Include="Content\OutputSQL\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\SourceCSS\ClaimFormHCFATertiary.css">
+    <Content Include="Content\SourceCSS\*\*.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\SourceCSS\ClaimFormUB.css">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\SourceCSS\Modified\ClaimFormHCFATertiary.Modified.css">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\SourceCSS\Modified\ClaimFormUB.Modified.css">
+    <Content Include="Content\SourceCSS\*.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

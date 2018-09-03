@@ -8,6 +8,6 @@ namespace CssParser.ConsoleApp.Implementations.Interfaces
 {
     public interface IParser
     {
-        void Run(string sourceDirectory);
+        void Run();
     }
 }

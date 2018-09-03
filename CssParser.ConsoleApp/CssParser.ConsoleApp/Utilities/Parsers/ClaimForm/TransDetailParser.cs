@@ -8,13 +8,15 @@ namespace CssParser.ConsoleApp.Utilities.Parsers.ClaimForm
     {
         const string OUTPUT_JSON_DIRECTORY = @"Content\OutputJSON";
         const string OUTPUT_SQL_DIRECTORY = @"Content\OutputSQL";
+        const string SOURCE_CSS_DIRECTORY = @"Content\SourceCSS";
+
         private ICssToJsonParser _claimFormCssParser = new CssToJsonParser();
         private IJsonToSqlParser _transDetailJsonParser = new JsonToSqlParser();
 
-        public void Run(string sourceDirectory)
+        public void Run()
         {
             ClearWorkingDirectories();
-            _claimFormCssParser.ParseSourceCssFiles(sourceDirectory);
+            _claimFormCssParser.ParseSourceCssFiles(SOURCE_CSS_DIRECTORY);
             _transDetailJsonParser.ParseTransDetJsonFiles(OUTPUT_JSON_DIRECTORY);
         }
 
