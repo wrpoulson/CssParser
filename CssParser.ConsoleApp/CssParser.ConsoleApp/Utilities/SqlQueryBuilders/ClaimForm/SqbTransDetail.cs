@@ -20,7 +20,7 @@ namespace CssParser.ConsoleApp.Utilities.SqlQueryBuilders.ClaimForm
 
         public static string PrintTableDoesNotExistRollback(string tableName)
         {
-            return $"{SqlQueryBuilder.Print($"ERROR: Table: {tableName} does NOT exist. Commencing transaction rollback.")}";
+            return $"{SqlQueryBuilder.Print($"ERROR: Table: {tableName} does NOT exist.")}";
         }
 
         public static string SqlIfElseUpdateTransDet(TransDetail transDetail)
