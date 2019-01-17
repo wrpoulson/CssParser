@@ -68,10 +68,7 @@ namespace CssParser.ConsoleApp.Utilities.Parsers.ClaimForm
 
         private void SaveSqlQueryScript(string query, string outputFileName)
         {
-            if (!Directory.Exists(OUTPUT_PATH))
-            {
-                Directory.CreateDirectory(OUTPUT_PATH);
-            }
+            Directory.CreateDirectory(OUTPUT_PATH);
             File.WriteAllText($"{OUTPUT_PATH}{outputFileName}.Updates.sql", query);
         }
     }
